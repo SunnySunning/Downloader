@@ -117,8 +117,6 @@ static DownloadManager *instance;
             downloadModel.resumeData = resumeDataStr;
             downloadModel.status = DownloadPause;
             [self.downloadCacher updateDownloadModel:downloadModel];
-            
-#warning 这里会出现潜在的bug
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.downloadQueue removeAllObjects];
             });
@@ -139,6 +137,7 @@ static DownloadManager *instance;
     {
         NSURLSessionDownloadTask *task = [self.downloadQueue firstObject];
         [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+            [self _deleteTmpFileWithResumeData:resumeData];
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 [self.downloadQueue removeAllObjects];
@@ -150,6 +149,30 @@ static DownloadManager *instance;
     [self.downloadCacher deleteDownloadModels:downloadArr];
     [self _tryToOpenNewDownloadTask];
 }
+
+- (void)_deleteTmpFileWithResumeData:(NSData *)resumeData
+{
+    NSError *error = nil;
+    NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+    NSDictionary *dict = [NSPropertyListSerialization propertyListWithData:resumeData options:0 format:&format error:&error];
+    if (!error)
+    {
+        NSString *tmpPath = [dict valueForKey:@"NSURLSessionResumeInfoTempFileName"];
+        tmpPath = [NSString stringWithFormat:@"%@/tmp/%@",NSHomeDirectory(),tmpPath];
+        BOOL fileExist = [[NSFileManager defaultManager] fileExistsAtPath:tmpPath];
+        if (fileExist)
+        {
+            NSError *error = nil;
+            [[NSFileManager defaultManager] removeItemAtPath:tmpPath error:&error];
+            if (!error)
+            {
+                NSLog(@"删除无用的临时文件成功!");
+            }
+        }
+    }
+    
+}
+
 
 - (void)startAllDownload
 {
