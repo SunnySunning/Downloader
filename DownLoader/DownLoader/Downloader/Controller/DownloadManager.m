@@ -118,10 +118,15 @@ static DownloadManager *instance;
             downloadModel.resumeData = resumeDataStr;
             downloadModel.status = DownloadPause;
             [self.downloadCacher updateDownloadModel:downloadModel];
+            /*
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.downloadQueue removeAllObjects];
             });
-            
+            */
+            @synchronized (self)
+            {
+                [self.downloadQueue removeAllObjects];
+            }
         }];
     }
 }
@@ -139,12 +144,17 @@ static DownloadManager *instance;
         NSURLSessionDownloadTask *task = [self.downloadQueue firstObject];
         [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
             [self _deleteTmpFileWithResumeData:resumeData];
+            /*
             dispatch_async(dispatch_get_main_queue(), ^{
-                
                 [self.downloadQueue removeAllObjects];
                 _downloadingModel = nil;
-                
             });
+             */
+            @synchronized (self)
+            {
+                [self.downloadQueue removeAllObjects];
+                _downloadingModel = nil;
+            }
         }];
     }
     [self.downloadCacher deleteDownloadModels:downloadArr];
