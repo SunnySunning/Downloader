@@ -123,7 +123,10 @@ static NSData *correctResumeData(NSData *data) {
         
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         
-        [self.downloadQueue removeLastObject];
+        @synchronized (self)
+        {
+            [self.downloadQueue removeLastObject];
+        }
         [self _tryToOpenNewDownloadTask];
         [self dealDownloadFinishedOrFailedWithError:error andDownloadModel:topWaitingModel];
         
