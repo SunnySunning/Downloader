@@ -61,7 +61,9 @@ static DownloadManager *instance;
 
 - (void)dealDownloadModel:(DownloadModel *)downloadModel
 {
-    DownloadStatus status = [self.downloadCacher queryDownloadStatusByModel:downloadModel];
+    [self initializeDownloadModelFromDBCahcher:downloadModel];
+    DownloadStatus status = downloadModel.status;
+    //DownloadStatus status = [self.downloadCacher queryDownloadStatusByModel:downloadModel];
     switch (status) {
         case DownloadNotExist:
             [self addDownloadModel:downloadModel];

@@ -44,10 +44,12 @@
     
     
     //从数据库进行初始化
+    /*
     for (DownloadModel *downloadModel in self.downloadModels)
     {
         [[DownloadManager shareInstance] initializeDownloadModelFromDBCahcher:downloadModel];
     }
+     */
     
 }
 
