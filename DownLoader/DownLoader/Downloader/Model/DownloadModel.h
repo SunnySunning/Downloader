@@ -20,7 +20,7 @@ typedef enum {
 @interface DownloadModel : NSObject
 
 @property (nonatomic,copy) NSString *name;
-@property (nonatomic,copy) NSString *url;
+@property (nonatomic,copy) NSString *url;//目前标识一个视频的字段
 @property (nonatomic,assign) DownloadStatus status;
 @property (nonatomic,assign) double downloadPercent;
 @property (nonatomic,copy) NSString *resumeData;

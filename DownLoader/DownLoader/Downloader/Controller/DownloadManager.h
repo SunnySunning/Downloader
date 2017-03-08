@@ -34,6 +34,7 @@
 - (void)initializeDownloadModelFromDBCahcher:(DownloadModel *)downloadModel;
 
 - (void)_tryToOpenNewDownloadTask;
+- (void)_postNotification:(NSString *)notificationName andObject:(id)object;
 - (void)dealDownloadFinishedOrFailedWithError:(NSError *)error andDownloadModel:(DownloadModel *)downloadModel;
 
 @end

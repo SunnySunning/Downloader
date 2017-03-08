@@ -115,9 +115,7 @@ static NSData *correctResumeData(NSData *data) {
         
         topWaitingModel.downloadPercent = downloadProgress.completedUnitCount / (downloadProgress.totalUnitCount * 1.0);
         [self.downloadCacher updateDownloadModel:topWaitingModel];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:topWaitingModel];
-        });
+        [self _postNotification:DownloadingUpdateNotification andObject:topWaitingModel];
         
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
         

@@ -59,6 +59,7 @@ static DownloadManager *instance;
     return _downloadQueue;
 }
 
+
 - (void)dealDownloadModel:(DownloadModel *)downloadModel
 {
     [self initializeDownloadModelFromDBCahcher:downloadModel];
@@ -103,7 +104,7 @@ static DownloadManager *instance;
 {
     downloadModel.status = DownloadWating;
     [self.downloadCacher insertDownloadModel:downloadModel];
-    [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:downloadModel];
+    [self _postNotification:DownloadingUpdateNotification andObject:downloadModel];
 }
 
 - (void)pauseDownloadModel:(DownloadModel *)downloadModel
@@ -112,8 +113,6 @@ static DownloadManager *instance;
     {
         NSURLSessionDownloadTask *task = [self.downloadQueue firstObject];
         [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-            
-            NSLog(@"NSThread  ==  %@",[NSThread currentThread]);
             
             NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
             downloadModel.resumeData = resumeDataStr;
@@ -130,7 +129,7 @@ static DownloadManager *instance;
 - (void)_changeStatusWithModel:(DownloadModel *)downloadModel
 {
     [self.downloadCacher updateDownloadModel:downloadModel];
-    [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:downloadModel];
+    [self _postNotification:DownloadingUpdateNotification andObject:downloadModel];
 }
 
 - (void)deleteDownloadModelArr:(NSArray *)downloadArr
@@ -181,7 +180,7 @@ static DownloadManager *instance;
     NSArray *arr = [self.downloadCacher startAllDownloadModels];
     for (DownloadModel *model in arr)
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:model];
+        [self _postNotification:DownloadingUpdateNotification andObject:model];
     }
     [self _tryToOpenNewDownloadTask];
 }
@@ -192,7 +191,7 @@ static DownloadManager *instance;
     NSArray *arr = [self.downloadCacher pauseAllDownloadModels];
     for (DownloadModel *model in arr)
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:model];
+        [self _postNotification:DownloadingUpdateNotification andObject:model];
     }
 }
 
@@ -224,9 +223,7 @@ static DownloadManager *instance;
                 
                 topWaitingModel.downloadPercent = downloadProgress.completedUnitCount / (downloadProgress.totalUnitCount * 1.0);
                 [self.downloadCacher updateDownloadModel:topWaitingModel];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:topWaitingModel];
-                });
+                [self _postNotification:DownloadingUpdateNotification andObject:topWaitingModel];
                 
             } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
                 
@@ -242,7 +239,7 @@ static DownloadManager *instance;
             [self.downloadQueue addObject:task];
             [task resume];
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:DownloadBeginNotification object:topWaitingModel];
+        [self _postNotification:DownloadBeginNotification andObject:topWaitingModel];
     }
 }
 
@@ -288,14 +285,10 @@ static DownloadManager *instance;
     }
 }
 
-
-
-
 - (void)dealDownloadFinishedOrFailedWithError:(NSError *)error andDownloadModel:(DownloadModel *)downloadModel
 {
     if (error)
     {
-        
         //手动暂停的
         if ([error.userInfo objectForKey:NSURLSessionDownloadTaskResumeData])
         {
@@ -304,13 +297,11 @@ static DownloadManager *instance;
             downloadModel.status = DownloadPause;
             [self.downloadCacher updateDownloadModel:downloadModel];
             
+            [self _postNotification:DownloadingUpdateNotification andObject:downloadModel];
+            
             dispatch_async(dispatch_get_main_queue(), ^{
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:DownloadingUpdateNotification object:downloadModel];
                 [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载暂停",downloadModel.name]];
-
             });
-
         }
         //下载出现错误
         else
@@ -318,12 +309,11 @@ static DownloadManager *instance;
             downloadModel.status = DownloadFailed;
             [self.downloadCacher updateDownloadModel:downloadModel];
 
+            downloadModel.error = error;
+            [self _postNotification:DownloadFailedNotification andObject:downloadModel];
+            
             dispatch_async(dispatch_get_main_queue(), ^{
-                
-                downloadModel.error = error;
-                [[NSNotificationCenter defaultCenter] postNotificationName:DownloadFailedNotification object:downloadModel];
                 [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载出现错误",downloadModel.name]];
-
             });
         }
         
@@ -335,14 +325,10 @@ static DownloadManager *instance;
         downloadModel.downloadPercent = 1.0;
         [self.downloadCacher updateDownloadModel:downloadModel];
 
+        [self _postNotification:DownloadFinishNotification andObject:downloadModel];
         dispatch_async(dispatch_get_main_queue(), ^{
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:DownloadFinishNotification object:downloadModel];
-            
             [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载完成",downloadModel.name]];
-            
         });
-        
     }
 }
 
@@ -354,7 +340,14 @@ static DownloadManager *instance;
     [[DownloadCacher shareInstance] initializeDownloadModelFromDBCahcher:downloadModel];
 }
 
-
+- (void)_postNotification:(NSString *)notificationName andObject:(id)object
+{
+    if (notificationName == nil || [notificationName isEqualToString:@""])
+        return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:object];
+    });
+}
 
 - (void)dealloc
 {
