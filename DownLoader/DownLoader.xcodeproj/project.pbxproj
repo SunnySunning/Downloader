@@ -25,6 +25,10 @@
 		B063040C1E52F7AA00B37007 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B063040A1E52F7AA00B37007 /* Main.storyboard */; };
 		B063040E1E52F7AA00B37007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B063040D1E52F7AA00B37007 /* Assets.xcassets */; };
 		B06304111E52F7AA00B37007 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B063040F1E52F7AA00B37007 /* LaunchScreen.storyboard */; };
+		B07288C71E6FEA5600974233 /* DownloadManager_M3U8.m in Sources */ = {isa = PBXBuildFile; fileRef = B07288C61E6FEA5600974233 /* DownloadManager_M3U8.m */; };
+		B07288CA1E6FEAA100974233 /* M3U8Analyser.m in Sources */ = {isa = PBXBuildFile; fileRef = B07288C91E6FEAA100974233 /* M3U8Analyser.m */; };
+		B07288CD1E700D8A00974233 /* M3U8SegmentInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = B07288CC1E700D8A00974233 /* M3U8SegmentInfo.m */; };
+		B07288D01E700F2F00974233 /* M3U8SegmentList.m in Sources */ = {isa = PBXBuildFile; fileRef = B07288CF1E700F2F00974233 /* M3U8SegmentList.m */; };
 		B0D37B001E6E601B00FEE8E1 /* LocalNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D37AFD1E6E601B00FEE8E1 /* LocalNotificationManager.m */; };
 		B0D37B011E6E601B00FEE8E1 /* UIWindow+CWStatusBarNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D37AFF1E6E601B00FEE8E1 /* UIWindow+CWStatusBarNotification.m */; };
 		B0D37B101E6E63B500FEE8E1 /* DownloadCacher.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D37B051E6E63B500FEE8E1 /* DownloadCacher.m */; };
@@ -72,6 +76,14 @@
 		B063040D1E52F7AA00B37007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B06304101E52F7AA00B37007 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B06304121E52F7AA00B37007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B07288C51E6FEA5600974233 /* DownloadManager_M3U8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadManager_M3U8.h; sourceTree = "<group>"; };
+		B07288C61E6FEA5600974233 /* DownloadManager_M3U8.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadManager_M3U8.m; sourceTree = "<group>"; };
+		B07288C81E6FEAA100974233 /* M3U8Analyser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = M3U8Analyser.h; sourceTree = "<group>"; };
+		B07288C91E6FEAA100974233 /* M3U8Analyser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = M3U8Analyser.m; sourceTree = "<group>"; };
+		B07288CB1E700D8A00974233 /* M3U8SegmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = M3U8SegmentInfo.h; sourceTree = "<group>"; };
+		B07288CC1E700D8A00974233 /* M3U8SegmentInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = M3U8SegmentInfo.m; sourceTree = "<group>"; };
+		B07288CE1E700F2F00974233 /* M3U8SegmentList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = M3U8SegmentList.h; sourceTree = "<group>"; };
+		B07288CF1E700F2F00974233 /* M3U8SegmentList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = M3U8SegmentList.m; sourceTree = "<group>"; };
 		B0D37AFC1E6E601B00FEE8E1 /* LocalNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalNotificationManager.h; sourceTree = "<group>"; };
 		B0D37AFD1E6E601B00FEE8E1 /* LocalNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalNotificationManager.m; sourceTree = "<group>"; };
 		B0D37AFE1E6E601B00FEE8E1 /* UIWindow+CWStatusBarNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWindow+CWStatusBarNotification.h"; sourceTree = "<group>"; };
@@ -195,6 +207,21 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		B07288C41E6FE9E800974233 /* m3u8 */ = {
+			isa = PBXGroup;
+			children = (
+				B07288C51E6FEA5600974233 /* DownloadManager_M3U8.h */,
+				B07288C61E6FEA5600974233 /* DownloadManager_M3U8.m */,
+				B07288C81E6FEAA100974233 /* M3U8Analyser.h */,
+				B07288C91E6FEAA100974233 /* M3U8Analyser.m */,
+				B07288CB1E700D8A00974233 /* M3U8SegmentInfo.h */,
+				B07288CC1E700D8A00974233 /* M3U8SegmentInfo.m */,
+				B07288CE1E700F2F00974233 /* M3U8SegmentList.h */,
+				B07288CF1E700F2F00974233 /* M3U8SegmentList.m */,
+			);
+			path = m3u8;
+			sourceTree = "<group>";
+		};
 		B0D37AFB1E6E601B00FEE8E1 /* LocalNotification */ = {
 			isa = PBXGroup;
 			children = (
@@ -219,6 +246,7 @@
 		B0D37B031E6E63B500FEE8E1 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				B07288C41E6FE9E800974233 /* m3u8 */,
 				B0D37B081E6E63B500FEE8E1 /* DownloadManager.h */,
 				B0D37B091E6E63B500FEE8E1 /* DownloadManager.m */,
 				B0D37B061E6E63B500FEE8E1 /* DownloadManager+Helper.h */,
@@ -328,11 +356,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B07288CD1E700D8A00974233 /* M3U8SegmentInfo.m in Sources */,
 				B06304091E52F7AA00B37007 /* ViewController.m in Sources */,
 				B03E5DD71E548F8400A6B97F /* AFSecurityPolicy.m in Sources */,
 				B06304061E52F7AA00B37007 /* AppDelegate.m in Sources */,
 				B0D37B131E6E63B500FEE8E1 /* DownloadModel.m in Sources */,
 				B06304031E52F7AA00B37007 /* main.m in Sources */,
+				B07288CA1E6FEAA100974233 /* M3U8Analyser.m in Sources */,
 				B0D37B201E6E876000FEE8E1 /* DownloadManager+AppWillTerminate.m in Sources */,
 				B03E5DC11E53F8B500A6B97F /* FMDatabase.m in Sources */,
 				B0D37B121E6E63B500FEE8E1 /* DownloadManager.m in Sources */,
@@ -344,12 +374,14 @@
 				B0D37B001E6E601B00FEE8E1 /* LocalNotificationManager.m in Sources */,
 				B03E5DC51E53F8B500A6B97F /* FMResultSet.m in Sources */,
 				B03E5DC91E5428F000A6B97F /* AFURLSessionManager.m in Sources */,
+				B07288C71E6FEA5600974233 /* DownloadManager_M3U8.m in Sources */,
 				B0D37B101E6E63B500FEE8E1 /* DownloadCacher.m in Sources */,
 				B03E5DD91E548F8400A6B97F /* AFURLResponseSerialization.m in Sources */,
 				B03E5DD61E548F8400A6B97F /* AFNetworkReachabilityManager.m in Sources */,
 				B03E5DC21E53F8B500A6B97F /* FMDatabaseAdditions.m in Sources */,
 				B03E5DD51E548F8400A6B97F /* AFHTTPSessionManager.m in Sources */,
 				B0D37B171E6E7EA400FEE8E1 /* DownloadManager+UIDevieBattery_Memory.m in Sources */,
+				B07288D01E700F2F00974233 /* M3U8SegmentList.m in Sources */,
 				B0D37B111E6E63B500FEE8E1 /* DownloadManager+Helper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
