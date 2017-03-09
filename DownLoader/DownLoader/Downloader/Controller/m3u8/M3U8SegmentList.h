@@ -11,10 +11,11 @@
 
 @interface M3U8SegmentList : NSObject
 
-@property (nonatomic,strong) NSArray *segments;
+@property (nonatomic,strong) NSMutableArray *segments;
 @property (nonatomic,assign) double totalDurations;
+@property (nonatomic,copy) NSString *videoUrl;
 
-- (id)initWithSegments:(NSArray *)segments;
+- (id)initWithSegments:(NSMutableArray *)segments;
 - (M3U8SegmentInfo *)getSegmentByIndex:(int)index;
 
 @end

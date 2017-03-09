@@ -25,6 +25,7 @@ typedef enum {
 @property (nonatomic,assign) double downloadPercent;
 @property (nonatomic,copy) NSString *resumeData;
 @property (nonatomic,assign) BOOL isM3u8Url;
+@property (nonatomic,assign) long long videoSize;
 @property (nonatomic,strong) NSError *error;
 
 @end

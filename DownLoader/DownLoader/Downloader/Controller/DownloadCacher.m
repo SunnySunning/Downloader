@@ -7,15 +7,12 @@
 //
 
 #import "DownloadCacher.h"
-#import "FMDB.h"
 
 static DownloadCacher *instance;
 #define DBName @"downloadCacher.db"
 #define DownloadCacherTable @"downloadCacherTable"
 
 @interface DownloadCacher ()
-
-@property (nonatomic,strong) FMDatabaseQueue *dbQueue;
 
 @end
 

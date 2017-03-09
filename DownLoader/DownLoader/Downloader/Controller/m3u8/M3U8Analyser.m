@@ -29,10 +29,10 @@
         return nil;
     }
     
-    return [self _analyseWithM3U8Str:m3u8Str];
+    return [self _analyseWithM3U8Str:m3u8Str videoUrl:videoUrl];
 }
 
-- (M3U8SegmentList *)_analyseWithM3U8Str:(NSString *)m3u8Str
+- (M3U8SegmentList *)_analyseWithM3U8Str:(NSString *)m3u8Str videoUrl:(NSString *)videoUrl
 {
     NSString *remainData = m3u8Str;
     NSMutableArray *segments = [NSMutableArray array];
@@ -61,7 +61,33 @@
     
     M3U8SegmentList *segmentList = [[M3U8SegmentList alloc] initWithSegments:segments];
     segmentList.totalDurations = totalSeconds;
+    segmentList.videoUrl = videoUrl;
     return segmentList;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @end

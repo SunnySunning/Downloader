@@ -7,7 +7,7 @@
 //
 
 #import "DownloadManager+Helper.h"
-
+#import "DownloadManager+Utils.h"
 
 static NSData * correctRequestData(NSData *data) {
     if (!data) {
@@ -115,11 +115,11 @@ static NSData *correctResumeData(NSData *data) {
         
         topWaitingModel.downloadPercent = downloadProgress.completedUnitCount / (downloadProgress.totalUnitCount * 1.0);
         [self.downloadCacher updateDownloadModel:topWaitingModel];
-        [self _postNotification:DownloadingUpdateNotification andObject:topWaitingModel];
+        [DownloadManager postNotification:DownloadingUpdateNotification andObject:topWaitingModel];
         
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
         
-        return [NSURL fileURLWithPath:[DownloadManager getLocalUrlWithVideoUrl:topWaitingModel.url]];
+        return [NSURL fileURLWithPath:[DownloadManager getMP4LocalUrlWithVideoUrl:topWaitingModel.url]];
         
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         

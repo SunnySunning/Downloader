@@ -8,19 +8,23 @@
 
 #import "DownloadManager_M3U8.h"
 #import "M3U8Analyser.h"
+#import "DownloadManager+Utils.h"
+#import "M3U8SegmentListDownloader.h"
 
 static DownloadManager_M3U8 *instance;
 
-@interface DownloadManager_M3U8 ()
+@interface DownloadManager_M3U8 ()<M3U8SegmentListDownloaderDelegate>
 
 @property (nonatomic,strong) M3U8Analyser *analyser;
 @property (nonatomic,strong) M3U8SegmentList *downloading_m3u8SegmentList;
+@property (nonatomic,strong) M3U8SegmentListDownloader *segmentListDownloader;
+@property (nonatomic,strong) DownloadModel *downloadModel;
 
 @end
 
 @implementation DownloadManager_M3U8
 
-+ (id)shareInstance
++ (instancetype)shareInstance
 {
     static dispatch_once_t token;
     dispatch_once(&token, ^{
@@ -38,9 +42,131 @@ static DownloadManager_M3U8 *instance;
     return _analyser;
 }
 
+- (M3U8SegmentListDownloader *)segmentListDownloader
+{
+    if (!_segmentListDownloader)
+    {
+        _segmentListDownloader = [[M3U8SegmentListDownloader alloc] init];
+        _segmentListDownloader.delegate = self;
+    }
+    return _segmentListDownloader;
+}
+
 - (void)dealWithModel:(DownloadModel *)downloadModel
+{
+    DownloadStatus status = downloadModel.status;
+    switch (status) {
+        case DownloadNotExist:
+            [self _addDownloadModel:downloadModel];
+            break;
+            
+        case Downloading:
+        {
+            [self _pauseDownloadModel:downloadModel];
+            break;
+        }
+            
+        case DownloadWating:
+        {
+            downloadModel.status = DownloadPause;
+            [self _changeStatusWithModel:downloadModel];
+            break;
+        }
+            
+        case DownloadPause:
+        case DownloadFailed:
+        {
+            downloadModel.status = DownloadWating;
+            [self _changeStatusWithModel:downloadModel];
+            break;
+        }
+            
+        case DownloadFinished:
+            break;
+            
+        default:
+            break;
+    }
+    if ([self respondsToSelector:@selector(m3u8Downloader:dealModelFinished:)])
+    {
+        [self.delegate m3u8Downloader:self dealModelFinished:downloadModel];
+    }
+}
+
+
+- (void)_addDownloadModel:(DownloadModel *)downloadModel
+{
+    downloadModel.status = DownloadWating;
+    [self.downloadCacher insertDownloadModel:downloadModel];
+    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
+}
+
+- (void)_changeStatusWithModel:(DownloadModel *)downloadModel
+{
+    [self.downloadCacher updateDownloadModel:downloadModel];
+    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
+}
+
+- (void)_pauseDownloadModel:(DownloadModel *)downloadModel
 {
     
 }
+
+- (void)m3u8Downloading:(DownloadModel *)downloadModel
+{
+    NSError *error = nil;
+    self.downloading_m3u8SegmentList = [self.analyser analyseVideoUrl:downloadModel.url error:&error];
+    if (error)
+    {
+        downloadModel.error = error;
+        if ([self.delegate respondsToSelector:@selector(m3u8Downloader:analyseFailed:)])
+        {
+            [self.delegate m3u8Downloader:self analyseFailed:downloadModel];
+        }
+    }
+    else
+    {
+        self.downloadModel = downloadModel;
+        [self.segmentListDownloader startDownload:self.downloadModel andSegmentList:self.downloading_m3u8SegmentList];
+    }
+}
+
+
+
+
+#pragma mark - segmentlistdownloaderdelegate
+- (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader beginDownload:(DownloadModel *)downloadModel segment:(M3U8SegmentInfo *)segment task:(NSURLSessionDownloadTask *)task
+{
+    if ([self.delegate respondsToSelector:@selector(m3u8SegmentListDownloader:beginDownload:segment:task:)])
+    {
+        [self.delegate m3u8Downloader:self beginDownload:self.downloadModel segment:segment task:task];
+    }
+}
+
+
+- (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader updateDownload:(DownloadModel *)downloadModel progress:(CGFloat)progress
+{
+    if ([self.delegate respondsToSelector:@selector(m3u8Downloader:updateDownload:progress:)])
+    {
+        [self.delegate m3u8Downloader:self updateDownload:self.downloadModel progress:progress];
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @end

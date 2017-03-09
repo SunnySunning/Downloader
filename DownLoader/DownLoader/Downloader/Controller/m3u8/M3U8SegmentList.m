@@ -7,10 +7,11 @@
 //
 
 #import "M3U8SegmentList.h"
+#import "DownloadManager+Utils.h"
 
 @implementation M3U8SegmentList
 
-- (id)initWithSegments:(NSArray *)segments
+- (id)initWithSegments:(NSMutableArray *)segments
 {
     if (self = [super init])
     {
@@ -26,6 +27,17 @@
         return [self.segments objectAtIndex:index];
     }
     return nil;
+}
+
+- (void)setVideoUrl:(NSString *)videoUrl
+{
+    _videoUrl = [videoUrl copy];
+    NSString *m3u8Path = [DownloadManager getM3U8LocalUrlWithVideoUrl:videoUrl];
+    for (M3U8SegmentInfo *segment in self.segments)
+    {
+        NSString *tsPath = [m3u8Path stringByAppendingPathComponent:segment.url];
+        segment.localUrl = tsPath;
+    }
 }
 
 @end

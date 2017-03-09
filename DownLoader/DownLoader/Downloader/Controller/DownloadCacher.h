@@ -8,8 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "DownloadModel.h"
+#import "FMDB.h"
 
 @interface DownloadCacher : NSObject
+
+@property (nonatomic,strong) FMDatabaseQueue *dbQueue;
 
 + (id)shareInstance;
 - (DownloadStatus)queryDownloadStatusByModel:(DownloadModel *)downloadModel;

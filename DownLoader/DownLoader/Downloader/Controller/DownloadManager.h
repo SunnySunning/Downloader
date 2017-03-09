@@ -10,12 +10,14 @@
 #import "DownloadModel.h"
 #import "AFURLSessionManager.h"
 #import "DownloadCacher.h"
+#import "DownloadManager_M3U8.h"
 
 #define DownloadingUpdateNotification @"DownloadingUpdateNotification"
 #define DownloadBeginNotification @"DownloadBeginNotification"
 #define DownloadFinishNotification @"DownloadFinishNotification"
 #define DownloadFailedNotification @"DownloadFailedNotification"
 #define UIDeviceBatteryLowPowerNotification @"UIDeviceBatteryLowPowerNotification"
+#define DownloadM3U8AnalyseFailedNotification @"DownloadM3U8AnalyseFailedNotification"
 
 @interface DownloadManager : NSObject
 
@@ -30,11 +32,9 @@
 - (void)deleteDownloadModelArr:(NSArray *)downloadArr;
 - (void)startAllDownload;
 - (void)pauseAllDownload;
-+ (NSString *)getLocalUrlWithVideoUrl:(NSString *)videoUrl;
 - (void)initializeDownloadModelFromDBCahcher:(DownloadModel *)downloadModel;
 
 - (void)_tryToOpenNewDownloadTask;
-- (void)_postNotification:(NSString *)notificationName andObject:(id)object;
 - (void)dealDownloadFinishedOrFailedWithError:(NSError *)error andDownloadModel:(DownloadModel *)downloadModel;
 
 @end
