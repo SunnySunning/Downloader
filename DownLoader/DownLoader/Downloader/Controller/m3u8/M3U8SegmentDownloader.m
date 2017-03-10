@@ -118,11 +118,12 @@
 - (void)pauseDownload
 {
     [self.task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-        
+        /*
         if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingPause:resumeData:)])
         {
             [self.delegate m3u8SegmentDownloader:self downloadingPause:self.segment resumeData:resumeData];
         }
+         */
         
     }];
 }

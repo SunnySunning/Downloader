@@ -115,13 +115,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "DownLoader/Downloader/Controller/DownloadManager.m"
-            timestampString = "510824594.887642"
+            filePath = "DownLoader/Downloader/Controller/m3u8/DownloadCacher+M3U8.m"
+            timestampString = "510827753.886587"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "396"
-            endingLineNumber = "396"
-            landmarkName = "-m3u8Downloader:pauseDownload:resumeData:tsIndex:alreadyDownloadSize:"
+            startingLineNumber = "93"
+            endingLineNumber = "93"
+            landmarkName = "-queryM3U8Record:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -131,13 +131,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "DownLoader/Downloader/Controller/DownloadManager.m"
-            timestampString = "510824735.631589"
+            filePath = "DownLoader/Downloader/Controller/m3u8/DownloadCacher+M3U8.m"
+            timestampString = "510827898.996012"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "405"
-            endingLineNumber = "405"
-            landmarkName = "-m3u8Downloader:pauseDownload:resumeData:tsIndex:alreadyDownloadSize:"
+            startingLineNumber = "55"
+            endingLineNumber = "55"
+            landmarkName = "-insertM3U8Record:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -147,13 +147,29 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "DownLoader/Downloader/Controller/m3u8/M3U8SegmentDownloader.m"
-            timestampString = "510825270.561786"
+            filePath = "DownLoader/Downloader/Controller/m3u8/DownloadCacher+M3U8.m"
+            timestampString = "510827933.150693"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "122"
-            endingLineNumber = "122"
-            landmarkName = "-pauseDownload"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "-queryM3U8Record:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DownLoader/Downloader/Controller/m3u8/DownloadCacher+M3U8.m"
+            timestampString = "510827957.854566"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
+            landmarkName = "-queryM3U8Record:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

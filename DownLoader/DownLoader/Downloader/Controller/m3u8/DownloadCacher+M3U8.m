@@ -74,12 +74,17 @@
             
         }
     }];
+    
+    NSDictionary *dict1 = [self queryM3U8Record:m3u8DictInfo[@"videoUrl"]];
+    NSLog(@"");
+    
 }
 
 - (NSDictionary *)queryM3U8Record:(NSString *)m3u8VideoUrl
 {
     NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ where videoUrl = '%@'", M3U8Table, m3u8VideoUrl];
     NSMutableDictionary *infoDict = [NSMutableDictionary dictionary];
+    __block NSMutableDictionary *weakDict = infoDict;
     [self.dbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet *resultSet = [db executeQuery:sql];
         while (resultSet.next)
@@ -89,13 +94,14 @@
             NSInteger tsDownloadTSIndex = [resultSet intForColumn:@"tsDownloadTSIndex"];
             NSString *resumeData = [resultSet stringForColumn:@"resumeData"];
             
-            [infoDict setValue:videoUrl forKey:@"videoUrl"];
-            [infoDict setValue:@(m3u8AlreadyDownloadSize) forKey:@"m3u8AlreadyDownloadSize"];
-            [infoDict setValue:@(tsDownloadTSIndex) forKey:@"tsDownloadTSIndex"];
-            [infoDict setValue:resumeData forKey:@"resumeData"];
+            [weakDict setValue:videoUrl forKey:@"videoUrl"];
+            [weakDict setValue:@(m3u8AlreadyDownloadSize) forKey:@"m3u8AlreadyDownloadSize"];
+            [weakDict setValue:@(tsDownloadTSIndex) forKey:@"tsDownloadTSIndex"];
+            [weakDict setValue:resumeData forKey:@"resumeData"];
+            break;
         }
     }];
-    return nil;
+    return weakDict;
 }
 
 @end

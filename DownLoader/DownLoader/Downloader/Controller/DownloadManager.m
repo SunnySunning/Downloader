@@ -397,6 +397,7 @@ static DownloadManager *instance;
     downloadModel.resumeData = resumeDataStr;
     downloadModel.status = DownloadPause;
     [self.downloadCacher updateDownloadModel:downloadModel];
+    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
 
     NSDictionary *m3u8Info = @{@"videoUrl":downloadModel.url,
                                @"m3u8AlreadyDownloadSize":@(alreadyDownloadSize),
@@ -409,6 +410,7 @@ static DownloadManager *instance;
         [self.downloadQueue removeAllObjects];
         self.downloadingModel = nil;
     }
+    [self _tryToOpenNewDownloadTask];
 }
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader failedDownload:(DownloadModel *)downloadModel
