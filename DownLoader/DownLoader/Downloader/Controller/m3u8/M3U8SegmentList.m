@@ -22,7 +22,7 @@
 
 - (M3U8SegmentInfo *)getSegmentByIndex:(int)index
 {
-    if (index < [self.segments count] && index > 0)
+    if (index < [self.segments count] && index >= 0)
     {
         return [self.segments objectAtIndex:index];
     }
@@ -32,11 +32,19 @@
 - (void)setVideoUrl:(NSString *)videoUrl
 {
     _videoUrl = [videoUrl copy];
+    
+    NSString *tsFullPath = [videoUrl stringByDeletingLastPathComponent];
+    
     NSString *m3u8Path = [DownloadManager getM3U8LocalUrlWithVideoUrl:videoUrl];
     for (M3U8SegmentInfo *segment in self.segments)
     {
         NSString *tsPath = [m3u8Path stringByAppendingPathComponent:segment.url];
+        tsPath = [tsPath stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         segment.localUrl = tsPath;
+        
+        NSString *tmpTsFullPath = [tsFullPath stringByAppendingPathComponent:segment.url];
+        tmpTsFullPath = [tmpTsFullPath stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+        segment.url = tmpTsFullPath;
     }
 }
 

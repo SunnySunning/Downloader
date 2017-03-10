@@ -7,6 +7,7 @@
 //
 
 #import "DownloadCacher.h"
+#import "DownloadCacher+M3U8.h"
 
 static DownloadCacher *instance;
 #define DBName @"downloadCacher.db"
@@ -31,6 +32,7 @@ static DownloadCacher *instance;
 {
     if (self = [super init])
     {
+#warning 创建数据库放到子线程
         NSString *dbPath = [NSString stringWithFormat:@"%@/%@",[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject],DBName];
         self.dbQueue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
         [self.dbQueue inDatabase:^(FMDatabase *db) {
@@ -38,7 +40,7 @@ static DownloadCacher *instance;
             {
                 NSLog(@"open or create db successful...");
                 
-                NSString *createSql = [NSString stringWithFormat:@"create table if not exists %@ (id integer primary key autoincrement,downloadStatus integer,videoName text,videoUrl text,downloadPercent real,resumeData text)",DownloadCacherTable];
+                NSString *createSql = [NSString stringWithFormat:@"create table if not exists %@ (id integer primary key autoincrement,downloadStatus integer,videoName text,videoUrl text,downloadPercent real,resumeData text,videoSize integer)",DownloadCacherTable];
                 BOOL createResult = [db executeUpdate:createSql];
                 if (createResult)
                 {
@@ -54,6 +56,9 @@ static DownloadCacher *instance;
                 NSLog(@"unopen or uncreate db...");
             }
         }];
+        
+        [self createM3U8Table];
+        
     }
     return self;
 }
@@ -84,6 +89,7 @@ static DownloadCacher *instance;
                 model.name = downloadModel.name;
                 model.status = [result intForColumn:@"downloadStatus"];
                 model.resumeData = [result stringForColumn:@"resumeData"];
+                model.videoSize = [result intForColumn:@"videoSize"];
                 break;
             }
             [result close];
@@ -97,7 +103,7 @@ static DownloadCacher *instance;
 
 - (void)insertDownloadModel:(DownloadModel *)downloadModel
 {
-    NSString *insertSql = [NSString stringWithFormat:@"insert into %@(downloadStatus,videoName,videoUrl,downloadPercent,resumeData) values (%d,'%@','%@',%f,'%@')",DownloadCacherTable,downloadModel.status,downloadModel.name,downloadModel.url,downloadModel.downloadPercent,downloadModel.resumeData];
+    NSString *insertSql = [NSString stringWithFormat:@"insert into %@(downloadStatus,videoName,videoUrl,downloadPercent,resumeData,videoSize) values (%d,'%@','%@',%f,'%@',%d)",DownloadCacherTable,downloadModel.status,downloadModel.name,downloadModel.url,downloadModel.downloadPercent,downloadModel.resumeData,downloadModel.videoSize];
     [self.dbQueue inDatabase:^(FMDatabase *db) {
         BOOL result = [db executeUpdate:insertSql];
         if (result)
@@ -185,6 +191,7 @@ static DownloadCacher *instance;
                 NSString *videoUrl = [result stringForColumn:@"videoUrl"];
                 double downloadPercent = [result doubleForColumn:@"downloadPercent"];
                 NSString *resumeData = [result stringForColumn:@"resumeData"];
+                long videoSize = [result longForColumn:@"videoSize"];
                 if ([resumeData isEqualToString:@"(null)"])
                 {
                     resumeData = nil;
@@ -195,6 +202,7 @@ static DownloadCacher *instance;
                 downloadModel.url = videoUrl;
                 downloadModel.downloadPercent = downloadPercent;
                 downloadModel.resumeData = resumeData;
+                downloadModel.videoSize = videoSize;
                 break;
             }
         }
@@ -211,7 +219,7 @@ static DownloadCacher *instance;
 
 - (void)getNewFromCacherWithModel:(DownloadModel *)downloadModel
 {
-    NSString *querySql = [NSString stringWithFormat:@"select downloadStatus,downloadPercent,resumeData from %@ where videoUrl = '%@'",DownloadCacherTable,downloadModel.url];
+    NSString *querySql = [NSString stringWithFormat:@"select downloadStatus,downloadPercent,resumeData,videoSize from %@ where videoUrl = '%@'",DownloadCacherTable,downloadModel.url];
     __block BOOL isExist = NO;
     [self.dbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet *result = [db executeQuery:querySql];
@@ -232,6 +240,7 @@ static DownloadCacher *instance;
                 model.name = downloadModel.name;
                 model.status = [result intForColumn:@"downloadStatus"];
                 model.resumeData = [result stringForColumn:@"resumeData"];
+                model.videoSize = [result longForColumn:@"videoSize"];
                 break;
             }
             [result close];
@@ -274,6 +283,7 @@ static DownloadCacher *instance;
                 NSString *videoUrl = [result stringForColumn:@"videoUrl"];
                 double downloadPercent = [result doubleForColumn:@"downloadPercent"];
                 NSString *resumeData = [result stringForColumn:@"resumeData"];
+                long videoSize = [result longForColumn:@"videoSize"];
                 if ([resumeData isEqualToString:@"(null)"])
                 {
                     resumeData = nil;
@@ -284,6 +294,7 @@ static DownloadCacher *instance;
                 downloadModel.url = videoUrl;
                 downloadModel.downloadPercent = downloadPercent;
                 downloadModel.resumeData = resumeData;
+                downloadModel.videoSize = videoSize;
                 [resultArray addObject:downloadModel];
             }
         }
@@ -326,6 +337,7 @@ static DownloadCacher *instance;
                 NSString *videoUrl = [result stringForColumn:@"videoUrl"];
                 double downloadPercent = [result doubleForColumn:@"downloadPercent"];
                 NSString *resumeData = [result stringForColumn:@"resumeData"];
+                long videoSize = [result longForColumn:@"videoSize"];
                 if ([resumeData isEqualToString:@"(null)"])
                 {
                     resumeData = nil;
@@ -336,6 +348,7 @@ static DownloadCacher *instance;
                 downloadModel.url = videoUrl;
                 downloadModel.downloadPercent = downloadPercent;
                 downloadModel.resumeData = resumeData;
+                downloadModel.videoSize = videoSize;
                 [resultArray addObject:downloadModel];
             }
         }

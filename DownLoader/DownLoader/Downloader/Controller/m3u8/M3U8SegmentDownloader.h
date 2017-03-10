@@ -27,6 +27,7 @@
 @property (nonatomic,strong) AFURLSessionManager *urlSession;
 @property (nonatomic,weak) id<M3U8SegmentDownloaderDelegate> delegate;
 
-- (void)startDownload:(M3U8SegmentInfo *)segment;
+- (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData;
+- (void)pauseDownload;
 
 @end

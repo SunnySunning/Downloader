@@ -8,38 +8,74 @@
 
 #import "M3U8SegmentDownloader.h"
 
+@interface M3U8SegmentDownloader ()
+
+@property (nonatomic,strong) M3U8SegmentInfo *segment;
+@property (nonatomic,strong) NSURLSessionDownloadTask *task;
+
+@end
+
 @implementation M3U8SegmentDownloader
 
-- (void)startDownload:(M3U8SegmentInfo *)segment
+- (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData
 {
-    NSURL *url = [NSURL URLWithString:segment.url];
-    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
-    
+    self.segment = segment;
     __weak M3U8SegmentInfo *weakSegment = segment;
+
+    if (resumeData)
+    {
+        NSData *resume = [resumeData dataUsingEncoding:NSUTF8StringEncoding];
+        NSURLSessionDownloadTask *task = [self.urlSession
+                                          downloadTaskWithResumeData:resume
+                                                            progress:^(NSProgress * _Nonnull downloadProgress) {
+            
+                                                                    if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingUpdateProgress:)])
+                                                                    {
+                                                                        [self.delegate m3u8SegmentDownloader:self downloadingUpdateProgress:downloadProgress];
+                                                                    }
+
+                                                            }
+                                                        destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                                                            return [NSURL fileURLWithPath:weakSegment.localUrl];
+                                                        }
+                                                completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                                                        [self _dealFinishOrFailedSegment:segment error:error];
+                                                }];
+        self.task = task;
+    }
     
-    NSURLSessionDownloadTask *task = [self.urlSession downloadTaskWithRequest:request
-                                    progress:^(NSProgress * _Nonnull downloadProgress) {
+    else
+    {
+        NSURL *url = [NSURL URLWithString:segment.url];
+        NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
         
-                                        
-                                        if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingUpdateProgress:)])
-                                        {
-                                            [self.delegate m3u8SegmentDownloader:self downloadingUpdateProgress:downloadProgress];
-                                        }
-                                        
-                                        
-                                    }
-                                 destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-                                     return [NSURL fileURLWithPath:weakSegment.localUrl];
-                                 }
-                           completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-                               
-                               [self _dealFinishOrFailedSegment:segment error:error];
-                               
-                           }];
-    [task resume];
+        
+        NSURLSessionDownloadTask *task = [self.urlSession downloadTaskWithRequest:request
+                                                                         progress:^(NSProgress * _Nonnull downloadProgress) {
+                                                                             
+                                                                             
+                                                                             if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingUpdateProgress:)])
+                                                                             {
+                                                                                 [self.delegate m3u8SegmentDownloader:self downloadingUpdateProgress:downloadProgress];
+                                                                             }
+                                                                             
+                                                                             
+                                                                         }
+                                                                      destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                                                                          return [NSURL fileURLWithPath:weakSegment.localUrl];
+                                                                      }
+                                                                completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                                                                    
+                                                                    [self _dealFinishOrFailedSegment:segment error:error];
+                                                                    
+                                                                }];
+        self.task = task;
+    }
+    
+    [self.task resume];
     if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingBegin:task:)])
     {
-        [self.delegate m3u8SegmentDownloader:self downloadingBegin:segment task:task];
+        [self.delegate m3u8SegmentDownloader:self downloadingBegin:segment task:self.task];
     }
 }
 
@@ -79,7 +115,17 @@
 }
 
 
-
+- (void)pauseDownload
+{
+    [self.task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+        
+        if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingPause:resumeData:)])
+        {
+            [self.delegate m3u8SegmentDownloader:self downloadingPause:self.segment resumeData:resumeData];
+        }
+        
+    }];
+}
 
 
 

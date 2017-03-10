@@ -53,6 +53,7 @@
         NSRange linkRangeEnd = [remainData rangeOfString:@"#"];
         NSString *linkurl = [remainData substringWithRange:NSMakeRange(linkRangeBegin.location, linkRangeEnd.location - linkRangeBegin.location)];
         segment.url = linkurl;
+        segment.shortUrl = linkurl;
         segmentIndex++;
         [segments addObject:segment];
         remainData = [remainData substringFromIndex:linkRangeEnd.location];

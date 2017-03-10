@@ -48,6 +48,7 @@ static DownloadManager_M3U8 *instance;
     {
         _segmentListDownloader = [[M3U8SegmentListDownloader alloc] init];
         _segmentListDownloader.delegate = self;
+        _segmentListDownloader.urlSession = self.urlSession;
     }
     return _segmentListDownloader;
 }
@@ -109,10 +110,10 @@ static DownloadManager_M3U8 *instance;
 
 - (void)_pauseDownloadModel:(DownloadModel *)downloadModel
 {
-    
+    [self.segmentListDownloader pauseDownload:downloadModel];
 }
 
-- (void)m3u8Downloading:(DownloadModel *)downloadModel
+- (void)m3u8Downloading:(DownloadModel *)downloadModel withInfo:(NSDictionary *)m3u8Info
 {
     NSError *error = nil;
     self.downloading_m3u8SegmentList = [self.analyser analyseVideoUrl:downloadModel.url error:&error];
@@ -127,7 +128,7 @@ static DownloadManager_M3U8 *instance;
     else
     {
         self.downloadModel = downloadModel;
-        [self.segmentListDownloader startDownload:self.downloadModel andSegmentList:self.downloading_m3u8SegmentList];
+        [self.segmentListDownloader startDownload:self.downloadModel andSegmentList:self.downloading_m3u8SegmentList withInfo:m3u8Info];
     }
 }
 
@@ -153,9 +154,29 @@ static DownloadManager_M3U8 *instance;
 }
 
 
+- (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader pauseDownload:(DownloadModel *)downloadModel resumeData:(NSData *)resumeData tsIndex:(NSInteger)tsIndex alreadyDownloadSize:(long long)alreadyDownloadSize
+{
+    if ([self.delegate respondsToSelector:@selector(m3u8Downloader:pauseDownload:resumeData:tsIndex:alreadyDownloadSize:)])
+    {
+        [self.delegate m3u8Downloader:self pauseDownload:downloadModel resumeData:resumeData tsIndex:tsIndex alreadyDownloadSize:alreadyDownloadSize];
+    }
+}
 
+- (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader failedDownload:(DownloadModel *)downloadModel
+{
+    if ([self.delegate respondsToSelector:@selector(m3u8Downloader:failedDownload:)])
+    {
+        [self.delegate m3u8Downloader:self failedDownload:downloadModel];
+    }
+}
 
-
+- (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader finishDownload:(DownloadModel *)downloadModel
+{
+    if ([self.delegate respondsToSelector:@selector(m3u8Downloader:finishDownload:)])
+    {
+        [self.delegate m3u8Downloader:self finishDownload:downloadModel];
+    }
+}
 
 
 

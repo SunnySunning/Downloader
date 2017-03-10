@@ -54,6 +54,10 @@
             return m3u8Path;
         }
     }
+    else
+    {
+        return m3u8Path;
+    }
     return nil;
 }
 

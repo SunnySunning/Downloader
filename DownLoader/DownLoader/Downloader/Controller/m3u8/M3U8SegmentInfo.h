@@ -11,6 +11,7 @@
 @interface M3U8SegmentInfo : NSObject
 
 @property (nonatomic,assign) double duration;
+@property (nonatomic,copy) NSString *shortUrl;
 @property (nonatomic,copy) NSString *url;
 @property (nonatomic,copy) NSString *localUrl;
 

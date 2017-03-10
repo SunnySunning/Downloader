@@ -11,6 +11,7 @@
 #import "DownloadManager+Helper.h"
 #import "DownloadManager+Utils.h"
 #import "LocalNotificationManager.h"
+#import "DownloadCacher+M3U8.h"
 
 static DownloadManager *instance;
 
@@ -241,7 +242,8 @@ static DownloadManager *instance;
         
         if (topWaitingModel.isM3u8Url)
         {
-            [[DownloadManager_M3U8 shareInstance] m3u8Downloading:topWaitingModel];
+            NSDictionary *m3u8Info = [self.downloadCacher queryM3U8Record:topWaitingModel.url];
+            [[DownloadManager_M3U8 shareInstance] m3u8Downloading:topWaitingModel withInfo:m3u8Info];
         }
         else
         {
@@ -387,6 +389,57 @@ static DownloadManager *instance;
     downloadModel.downloadPercent = progress;
     [self.downloadCacher updateDownloadModel:downloadModel];
     [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
+}
+
+- (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader pauseDownload:(DownloadModel *)downloadModel resumeData:(NSData *)resumeData tsIndex:(NSInteger)tsIndex alreadyDownloadSize:(long long)alreadyDownloadSize
+{
+    NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
+    downloadModel.resumeData = resumeDataStr;
+    downloadModel.status = DownloadPause;
+    [self.downloadCacher updateDownloadModel:downloadModel];
+
+    NSDictionary *m3u8Info = @{@"videoUrl":downloadModel.url,
+                               @"m3u8AlreadyDownloadSize":@(alreadyDownloadSize),
+                               @"tsDownloadTSIndex":@(tsIndex),
+                               @"resumeData":resumeDataStr};
+    [self.downloadCacher insertM3U8Record:m3u8Info];
+    
+    @synchronized (self)
+    {
+        [self.downloadQueue removeAllObjects];
+        self.downloadingModel = nil;
+    }
+}
+
+- (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader failedDownload:(DownloadModel *)downloadModel
+{
+    downloadModel.status = DownloadFailed;
+    [self.downloadCacher updateDownloadModel:downloadModel];
+    
+    [DownloadManager postNotification:DownloadFailedNotification andObject:downloadModel];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载出现错误",downloadModel.name]];
+    });
+
+}
+
+- (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader finishDownload:(DownloadModel *)downloadModel
+{
+    downloadModel.status = DownloadFinished;
+    downloadModel.downloadPercent = 1.0;
+    [self.downloadCacher updateDownloadModel:downloadModel];
+    
+    [self.downloadCacher deleteM3U8Record:downloadModel.url];
+    
+    [DownloadManager postNotification:DownloadFinishNotification andObject:downloadModel];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载完成",downloadModel.name]];
+    });
+    
+    [self.downloadQueue removeLastObject];
+    [self _tryToOpenNewDownloadTask];
+
 }
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader dealModelFinished:(DownloadModel *)downloadModel
