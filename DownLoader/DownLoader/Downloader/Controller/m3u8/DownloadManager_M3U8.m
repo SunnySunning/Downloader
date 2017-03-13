@@ -49,68 +49,14 @@ static DownloadManager_M3U8 *instance;
         _segmentListDownloader = [[M3U8SegmentListDownloader alloc] init];
         _segmentListDownloader.delegate = self;
         _segmentListDownloader.urlSession = self.urlSession;
+        _segmentListDownloader.downloadCacher = self.downloadCacher;
     }
     return _segmentListDownloader;
 }
 
-- (void)dealWithModel:(DownloadModel *)downloadModel
+- (void)pauseDownloadModel:(DownloadModel *)downloadModel withResumeData:(NSData *)resumeData
 {
-    DownloadStatus status = downloadModel.status;
-    switch (status) {
-        case DownloadNotExist:
-            [self _addDownloadModel:downloadModel];
-            break;
-            
-        case Downloading:
-        {
-            [self _pauseDownloadModel:downloadModel];
-            break;
-        }
-            
-        case DownloadWating:
-        {
-            downloadModel.status = DownloadPause;
-            [self _changeStatusWithModel:downloadModel];
-            break;
-        }
-            
-        case DownloadPause:
-        case DownloadFailed:
-        {
-            downloadModel.status = DownloadWating;
-            [self _changeStatusWithModel:downloadModel];
-            break;
-        }
-            
-        case DownloadFinished:
-            break;
-            
-        default:
-            break;
-    }
-    if ([self respondsToSelector:@selector(m3u8Downloader:dealModelFinished:)])
-    {
-        [self.delegate m3u8Downloader:self dealModelFinished:downloadModel];
-    }
-}
-
-
-- (void)_addDownloadModel:(DownloadModel *)downloadModel
-{
-    downloadModel.status = DownloadWating;
-    [self.downloadCacher insertDownloadModel:downloadModel];
-    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
-}
-
-- (void)_changeStatusWithModel:(DownloadModel *)downloadModel
-{
-    [self.downloadCacher updateDownloadModel:downloadModel];
-    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
-}
-
-- (void)_pauseDownloadModel:(DownloadModel *)downloadModel
-{
-    [self.segmentListDownloader pauseDownload:downloadModel];
+    [self.segmentListDownloader pauseDownload:downloadModel withResumeData:resumeData];
 }
 
 - (void)m3u8Downloading:(DownloadModel *)downloadModel withInfo:(NSDictionary *)m3u8Info
@@ -138,7 +84,7 @@ static DownloadManager_M3U8 *instance;
 #pragma mark - segmentlistdownloaderdelegate
 - (void)m3u8SegmentListDownloader:(M3U8SegmentListDownloader *)segmentListDownloader beginDownload:(DownloadModel *)downloadModel segment:(M3U8SegmentInfo *)segment task:(NSURLSessionDownloadTask *)task
 {
-    if ([self.delegate respondsToSelector:@selector(m3u8SegmentListDownloader:beginDownload:segment:task:)])
+    if ([self.delegate respondsToSelector:@selector(m3u8Downloader:beginDownload:segment:task:)])
     {
         [self.delegate m3u8Downloader:self beginDownload:self.downloadModel segment:segment task:task];
     }

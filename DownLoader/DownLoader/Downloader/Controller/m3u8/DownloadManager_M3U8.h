@@ -34,7 +34,7 @@
 @property (nonatomic,weak) id<DownloadManager_M3U8_Delegate> delegate;
 
 + (instancetype)shareInstance;
-- (void)dealWithModel:(DownloadModel *)downloadModel;
 - (void)m3u8Downloading:(DownloadModel *)downloadModel withInfo:(NSDictionary *)m3u8Info;
+- (void)pauseDownloadModel:(DownloadModel *)downloadModel withResumeData:(NSData *)resumeData;
 
 @end

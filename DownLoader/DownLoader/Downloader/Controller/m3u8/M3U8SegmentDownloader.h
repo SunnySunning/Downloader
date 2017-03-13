@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "AFURLSessionManager.h"
 #import "M3U8SegmentInfo.h"
+#import "DownloadCacher+M3U8.h"
 
 @class M3U8SegmentDownloader;
 
@@ -25,9 +26,11 @@
 @interface M3U8SegmentDownloader : NSObject
 
 @property (nonatomic,strong) AFURLSessionManager *urlSession;
+@property (nonatomic,strong) DownloadCacher *downloadCacher;
 @property (nonatomic,weak) id<M3U8SegmentDownloaderDelegate> delegate;
 
 - (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData;
-- (void)pauseDownload;
+- (void)pauseDownloadWithResumeData:(NSData *)resumeData downloadIndex:(NSInteger)index downloadSize:(NSInteger)downloadSize url:(NSString *)url;
+- (void)_dealFinishOrFailedSegment:(M3U8SegmentInfo *)segment error:(NSError *)error;
 
 @end

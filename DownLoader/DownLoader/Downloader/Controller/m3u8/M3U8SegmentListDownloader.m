@@ -17,6 +17,7 @@
 @property (nonatomic,assign) NSInteger downloadingIndex;
 @property (nonatomic,strong) M3U8SegmentDownloader *segmentDownloader;
 @property (nonatomic,assign) long long alreadyDownloadSize;
+@property (nonatomic,assign) long long tmpSize;
 
 @end
 
@@ -29,6 +30,7 @@
         _segmentDownloader = [[M3U8SegmentDownloader alloc] init];
         _segmentDownloader.urlSession = self.urlSession;
         _segmentDownloader.delegate = self;
+        _segmentDownloader.downloadCacher = self.downloadCacher;
     }
     return _segmentDownloader;
 }
@@ -55,9 +57,10 @@
     }
 }
 
-- (void)pauseDownload:(DownloadModel *)downloadModel
+- (void)pauseDownload:(DownloadModel *)downloadModel withResumeData:(NSData *)resumeData
 {
-    [self.segmentDownloader pauseDownload];
+    self.downloadingModel.status = DownloadPause;
+    [self.segmentDownloader pauseDownloadWithResumeData:resumeData downloadIndex:self.downloadingIndex downloadSize:self.tmpSize url:self.downloadingModel.url];
 }
 
 - (void)_startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData
@@ -79,7 +82,7 @@
 
 - (void)m3u8SegmentDownloader:(M3U8SegmentDownloader *)m3u8SegmentDownloader downloadingUpdateProgress:(NSProgress *)progress
 {
-    
+    self.tmpSize = self.alreadyDownloadSize + progress.completedUnitCount;
     CGFloat downloadProgress = (self.alreadyDownloadSize + progress.completedUnitCount) / (self.downloadingModel.videoSize * 1.0);
     if (progress.completedUnitCount == progress.totalUnitCount)
     {

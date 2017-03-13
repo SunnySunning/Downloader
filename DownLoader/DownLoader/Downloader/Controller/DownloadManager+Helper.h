@@ -12,6 +12,9 @@
 
 @interface DownloadManager (Helper)
 
+extern NSData *correctResumeData(NSData *data);
+extern NSMutableDictionary *getResumeDictionary(NSData *data);
+extern NSData * correctRequestData(NSData *data);
 - (NSURLSessionDownloadTask *)_downloadTaskWithOriginResumeData:(NSData *)resumeData withDownloadModel:(DownloadModel *)topWaitingModel;
 
 @end

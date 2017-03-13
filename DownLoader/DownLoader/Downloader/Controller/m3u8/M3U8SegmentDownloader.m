@@ -7,6 +7,7 @@
 //
 
 #import "M3U8SegmentDownloader.h"
+#import "M3U8SegmentDownloader+Helper.h"
 
 @interface M3U8SegmentDownloader ()
 
@@ -22,25 +23,10 @@
     self.segment = segment;
     __weak M3U8SegmentInfo *weakSegment = segment;
 
-    if (resumeData)
+    if (![resumeData isEqualToString:@""] && resumeData)
     {
         NSData *resume = [resumeData dataUsingEncoding:NSUTF8StringEncoding];
-        NSURLSessionDownloadTask *task = [self.urlSession
-                                          downloadTaskWithResumeData:resume
-                                                            progress:^(NSProgress * _Nonnull downloadProgress) {
-            
-                                                                    if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingUpdateProgress:)])
-                                                                    {
-                                                                        [self.delegate m3u8SegmentDownloader:self downloadingUpdateProgress:downloadProgress];
-                                                                    }
-
-                                                            }
-                                                        destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-                                                            return [NSURL fileURLWithPath:weakSegment.localUrl];
-                                                        }
-                                                completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-                                                        [self _dealFinishOrFailedSegment:segment error:error];
-                                                }];
+        NSURLSessionDownloadTask *task = [self _downloadTaskWithOriginResumeData:resume withSegment:segment];
         self.task = task;
     }
     
@@ -115,17 +101,14 @@
 }
 
 
-- (void)pauseDownload
+- (void)pauseDownloadWithResumeData:(NSData *)resumeData downloadIndex:(NSInteger)index downloadSize:(NSInteger)downloadSize url:(NSString *)url
 {
-    [self.task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-        /*
-        if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingPause:resumeData:)])
-        {
-            [self.delegate m3u8SegmentDownloader:self downloadingPause:self.segment resumeData:resumeData];
-        }
-         */
-        
-    }];
+    NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
+    NSDictionary *m3u8Info = @{@"videoUrl":url,
+                               @"m3u8AlreadyDownloadSize":@(downloadSize),
+                               @"tsDownloadTSIndex":@(index),
+                               @"resumeData":resumeDataStr};
+    [self.downloadCacher insertM3U8Record:m3u8Info];
 }
 
 

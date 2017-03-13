@@ -9,7 +9,7 @@
 #import "DownloadManager+Helper.h"
 #import "DownloadManager+Utils.h"
 
-static NSData * correctRequestData(NSData *data) {
+extern NSData * correctRequestData(NSData *data) {
     if (!data) {
         return nil;
     }
@@ -61,7 +61,7 @@ static NSData * correctRequestData(NSData *data) {
     return result;
 }
 
-static NSMutableDictionary *getResumeDictionary(NSData *data) {
+extern NSMutableDictionary *getResumeDictionary(NSData *data) {
     NSMutableDictionary *iresumeDictionary = nil;
     if (IS_IOS10ORLATER) {
         id root = nil;
@@ -84,7 +84,7 @@ static NSMutableDictionary *getResumeDictionary(NSData *data) {
     return iresumeDictionary;
 }
 
-static NSData *correctResumeData(NSData *data) {
+extern NSData *correctResumeData(NSData *data) {
     NSString *kResumeCurrentRequest = @"NSURLSessionResumeCurrentRequest";
     NSString *kResumeOriginalRequest = @"NSURLSessionResumeOriginalRequest";
     if (data == nil) {
@@ -123,10 +123,6 @@ static NSData *correctResumeData(NSData *data) {
         
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         
-        @synchronized (self)
-        {
-            [self.downloadQueue removeLastObject];
-        }
         [self _tryToOpenNewDownloadTask];
         [self dealDownloadFinishedOrFailedWithError:error andDownloadModel:topWaitingModel];
         

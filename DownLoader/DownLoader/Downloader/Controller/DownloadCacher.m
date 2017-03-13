@@ -407,7 +407,21 @@ static DownloadCacher *instance;
 
 
 
-
+- (BOOL)checkIsExistDownloading
+{
+    NSString *querySql = [NSString stringWithFormat:@"select * from %@ where downloadStatus = %d",DownloadCacherTable,2];//正在下载
+    __block BOOL exist = NO;
+    [self.dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet *result = [db executeQuery:querySql];
+       
+        while ([result next])
+        {
+            exist = YES;
+        }
+        [result close];
+    }];
+    return exist;
+}
 
 
 

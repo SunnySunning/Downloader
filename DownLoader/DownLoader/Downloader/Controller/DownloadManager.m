@@ -40,6 +40,7 @@ static DownloadManager *instance;
         self.urlSession = [[AFURLSessionManager alloc] initWithSessionConfiguration:scf];
         self.downloadCacher = [DownloadCacher shareInstance];
         [self _checkOrCreateDownloadFolder];
+        [self initM3U8];
         [self.urlSession setDidFinishEventsForBackgroundURLSessionBlock:^(NSURLSession * _Nonnull session) {
             AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
             if (appDelegate.backgroundSessionCompletionHandler)
@@ -64,18 +65,6 @@ static DownloadManager *instance;
 - (void)dealDownloadModel:(DownloadModel *)downloadModel
 {
     [self initializeDownloadModelFromDBCahcher:downloadModel];
-    if (downloadModel.isM3u8Url)
-    {
-        [self _dealDownload_M3U8:downloadModel];
-    }
-    else
-    {
-        [self _dealDownload_MP4:downloadModel];
-    }
-}
-
-- (void)_dealDownload_MP4:(DownloadModel *)downloadModel
-{
     DownloadStatus status = downloadModel.status;
     switch (status) {
         case DownloadNotExist:
@@ -112,12 +101,11 @@ static DownloadManager *instance;
     [self _tryToOpenNewDownloadTask];
 }
 
-- (void)_dealDownload_M3U8:(DownloadModel *)downloadModel
+- (void)initM3U8
 {
     [DownloadManager_M3U8 shareInstance].delegate = self;
     [DownloadManager_M3U8 shareInstance].downloadCacher = self.downloadCacher;
     [DownloadManager_M3U8 shareInstance].urlSession = self.urlSession;
-    [[DownloadManager_M3U8 shareInstance] dealWithModel:downloadModel];
 }
 
 - (void)addDownloadModel:(DownloadModel *)downloadModel
@@ -129,25 +117,35 @@ static DownloadManager *instance;
 
 - (void)pauseDownloadModel:(DownloadModel *)downloadModel
 {
-    if ([self.downloadQueue count] > 0)
+    if ([self.downloadCacher checkIsExistDownloading])
     {
-        NSURLSessionDownloadTask *task = [self.downloadQueue firstObject];
-        [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-            
-            NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
-            downloadModel.resumeData = resumeDataStr;
-            downloadModel.status = DownloadPause;
-            [self.downloadCacher updateDownloadModel:downloadModel];
-            /*
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.downloadQueue removeAllObjects];
-            });
-            */
-            @synchronized (self)
+        NSLog(@"[[self.urlSession downloadTasks] count]   ===   %lu",(unsigned long)[[self.urlSession downloadTasks] count]);
+        
+        while (1)
+        {
+            NSURLSessionDownloadTask *task = [[self.urlSession downloadTasks] firstObject];
+            if (task.state == NSURLSessionTaskStateRunning)
             {
-                [self.downloadQueue removeAllObjects];
+                if (downloadModel.isM3u8Url)
+                {
+                    [task cancel];
+                    [[self.urlSession downloadTasks] makeObjectsPerformSelector:@selector(cancel)];
+                    downloadModel.status = DownloadPause;
+                    [self.downloadCacher updateDownloadModel:downloadModel];
+                    [[DownloadManager_M3U8 shareInstance] pauseDownloadModel:downloadModel withResumeData:nil];
+                }
+                else
+                {
+                    [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+                        NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
+                        downloadModel.resumeData = resumeDataStr;
+                        downloadModel.status = DownloadPause;
+                        [self.downloadCacher updateDownloadModel:downloadModel];
+                    }];
+                }
+                break;
             }
-        }];
+        }
     }
 }
 
@@ -161,20 +159,10 @@ static DownloadManager *instance;
 {
     if ([downloadArr containsObject:_downloadingModel])
     {
-        NSURLSessionDownloadTask *task = [self.downloadQueue firstObject];
+        NSURLSessionDownloadTask *task = [[self.urlSession downloadTasks] firstObject];
         [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
             [self _deleteTmpFileWithResumeData:resumeData];
-            /*
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.downloadQueue removeAllObjects];
-                _downloadingModel = nil;
-            });
-             */
-            @synchronized (self)
-            {
-                [self.downloadQueue removeAllObjects];
-                _downloadingModel = nil;
-            }
+            _downloadingModel = nil;
         }];
     }
     [self.downloadCacher deleteDownloadModels:downloadArr];
@@ -227,7 +215,7 @@ static DownloadManager *instance;
 
 - (void)_tryToOpenNewDownloadTask
 {
-    if ([self.downloadQueue count] > 0)//有一个正在下载的task 返回
+    if ([self.downloadCacher checkIsExistDownloading])//存在正在下载
         return;
     DownloadModel *topWaitingModel = [self.downloadCacher queryTopWaitingDownloadModel];
     if (!topWaitingModel)
@@ -258,7 +246,6 @@ static DownloadManager *instance;
     {
         NSData *resumeData = [downloadModel.resumeData dataUsingEncoding:NSUTF8StringEncoding];
         NSURLSessionDownloadTask *task = [self _downloadTaskWithOriginResumeData:resumeData withDownloadModel:downloadModel];
-        [self.downloadQueue addObject:task];
         [task resume];
     }
     else
@@ -276,12 +263,10 @@ static DownloadManager *instance;
             
         } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
             
-            [self.downloadQueue removeLastObject];
             [self _tryToOpenNewDownloadTask];
             [self dealDownloadFinishedOrFailedWithError:error andDownloadModel:downloadModel];
             
         }];
-        [self.downloadQueue addObject:task];
         [task resume];
     }
     [DownloadManager postNotification:DownloadBeginNotification andObject:downloadModel];
@@ -379,9 +364,8 @@ static DownloadManager *instance;
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader beginDownload:(DownloadModel *)downloadModel segment:(M3U8SegmentInfo *)segment task:(NSURLSessionDownloadTask *)task
 {
-    [self.downloadQueue removeLastObject];
-    [self.downloadQueue addObject:task];
     self.downloadingModel = downloadModel;
+    [DownloadManager postNotification:DownloadBeginNotification andObject:downloadModel];
 }
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader updateDownload:(DownloadModel *)downloadModel progress:(CGFloat)progress
@@ -393,28 +377,12 @@ static DownloadManager *instance;
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader pauseDownload:(DownloadModel *)downloadModel resumeData:(NSData *)resumeData tsIndex:(NSInteger)tsIndex alreadyDownloadSize:(long long)alreadyDownloadSize
 {
-    NSString *resumeDataStr = [[NSString alloc] initWithData:resumeData encoding:NSUTF8StringEncoding];
-    downloadModel.resumeData = resumeDataStr;
-    downloadModel.status = DownloadPause;
-    [self.downloadCacher updateDownloadModel:downloadModel];
     [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
-
-    NSDictionary *m3u8Info = @{@"videoUrl":downloadModel.url,
-                               @"m3u8AlreadyDownloadSize":@(alreadyDownloadSize),
-                               @"tsDownloadTSIndex":@(tsIndex),
-                               @"resumeData":resumeDataStr};
-    [self.downloadCacher insertM3U8Record:m3u8Info];
-    
-    @synchronized (self)
-    {
-        [self.downloadQueue removeAllObjects];
-        self.downloadingModel = nil;
-    }
-    [self _tryToOpenNewDownloadTask];
 }
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader failedDownload:(DownloadModel *)downloadModel
 {
+    /*
     downloadModel.status = DownloadFailed;
     [self.downloadCacher updateDownloadModel:downloadModel];
     
@@ -423,7 +391,7 @@ static DownloadManager *instance;
     dispatch_async(dispatch_get_main_queue(), ^{
         [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载出现错误",downloadModel.name]];
     });
-
+*/
 }
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader finishDownload:(DownloadModel *)downloadModel
@@ -439,7 +407,6 @@ static DownloadManager *instance;
         [LocalNotificationManager sendNotificationNow:[[NSString alloc] initWithFormat:@"%@--下载完成",downloadModel.name]];
     });
     
-    [self.downloadQueue removeLastObject];
     [self _tryToOpenNewDownloadTask];
 
 }

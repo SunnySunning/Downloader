@@ -25,5 +25,6 @@
 - (NSArray *)startAllDownloadModels;
 - (NSArray *)pauseAllDownloadModels;
 - (void)initializeDownloadModelFromDBCahcher:(DownloadModel *)downloadModel;
+- (BOOL)checkIsExistDownloading;
 
 @end

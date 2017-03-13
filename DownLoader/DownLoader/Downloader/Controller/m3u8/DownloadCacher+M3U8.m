@@ -53,7 +53,7 @@
 {
     NSDictionary *dict = [self queryM3U8Record:m3u8DictInfo[@"videoUrl"]];
     NSString *sql = nil;
-    if (dict)
+    if ([dict valueForKey:@"videoUrl"])
     {
         sql = [NSString stringWithFormat:@"UPDATE %@ SET m3u8AlreadyDownloadSize = %ld, tsDownloadTSIndex = %ld,resumeData = '%@'  WHERE videoUrl = '%@' ", M3U8Table, [m3u8DictInfo[@"m3u8AlreadyDownloadSize"] longValue],[m3u8DictInfo[@"tsDownloadTSIndex"] longValue],m3u8DictInfo[@"resumeData"], m3u8DictInfo[@"videoUrl"]];
     }
@@ -67,17 +67,13 @@
         BOOL result = [db executeUpdate:sql];
         if (result)
         {
-            
+            NSLog(@"INSERT OR UPDATE M3U8Table SUCCESSFUL...");
         }
         else
         {
-            
+            NSLog(@"INSERT OR UPDATE M3U8Table FAILED...");
         }
     }];
-    
-    NSDictionary *dict1 = [self queryM3U8Record:m3u8DictInfo[@"videoUrl"]];
-    NSLog(@"");
-    
 }
 
 - (NSDictionary *)queryM3U8Record:(NSString *)m3u8VideoUrl
@@ -100,6 +96,7 @@
             [weakDict setValue:resumeData forKey:@"resumeData"];
             break;
         }
+        [resultSet close];
     }];
     return weakDict;
 }

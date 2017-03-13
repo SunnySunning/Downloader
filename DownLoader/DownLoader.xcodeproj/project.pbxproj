@@ -19,6 +19,7 @@
 		B03E5DD81E548F8400A6B97F /* AFURLRequestSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = B03E5DD21E548F8400A6B97F /* AFURLRequestSerialization.m */; };
 		B03E5DD91E548F8400A6B97F /* AFURLResponseSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = B03E5DD41E548F8400A6B97F /* AFURLResponseSerialization.m */; };
 		B03E5DDE1E5490F100A6B97F /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B03E5DDB1E54902B00A6B97F /* libsqlite3.tbd */; };
+		B0483E221E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = B0483E211E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m */; };
 		B06304031E52F7AA00B37007 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B06304021E52F7AA00B37007 /* main.m */; };
 		B06304061E52F7AA00B37007 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B06304051E52F7AA00B37007 /* AppDelegate.m */; };
 		B06304091E52F7AA00B37007 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B06304081E52F7AA00B37007 /* ViewController.m */; };
@@ -70,6 +71,8 @@
 		B03E5DD31E548F8400A6B97F /* AFURLResponseSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLResponseSerialization.h; sourceTree = "<group>"; };
 		B03E5DD41E548F8400A6B97F /* AFURLResponseSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLResponseSerialization.m; sourceTree = "<group>"; };
 		B03E5DDB1E54902B00A6B97F /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		B0483E201E7668E000609BE7 /* M3U8SegmentDownloader+Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "M3U8SegmentDownloader+Helper.h"; sourceTree = "<group>"; };
+		B0483E211E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "M3U8SegmentDownloader+Helper.m"; sourceTree = "<group>"; };
 		B06303FE1E52F7AA00B37007 /* DownLoader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DownLoader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B06304021E52F7AA00B37007 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B06304041E52F7AA00B37007 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -236,6 +239,8 @@
 				B063EF101E70F7FC00A178C9 /* M3U8SegmentDownloader.m */,
 				B063EF121E7102B600A178C9 /* DownloadCacher+M3U8.h */,
 				B063EF131E7102B600A178C9 /* DownloadCacher+M3U8.m */,
+				B0483E201E7668E000609BE7 /* M3U8SegmentDownloader+Helper.h */,
+				B0483E211E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m */,
 			);
 			path = m3u8;
 			sourceTree = "<group>";
@@ -395,6 +400,7 @@
 				B03E5DD81E548F8400A6B97F /* AFURLRequestSerialization.m in Sources */,
 				B0D37B001E6E601B00FEE8E1 /* LocalNotificationManager.m in Sources */,
 				B03E5DC51E53F8B500A6B97F /* FMResultSet.m in Sources */,
+				B0483E221E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m in Sources */,
 				B03E5DC91E5428F000A6B97F /* AFURLSessionManager.m in Sources */,
 				B07288C71E6FEA5600974233 /* DownloadManager_M3U8.m in Sources */,
 				B0D37B101E6E63B500FEE8E1 /* DownloadCacher.m in Sources */,
