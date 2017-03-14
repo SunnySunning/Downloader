@@ -12,7 +12,6 @@
 @interface M3U8SegmentDownloader ()
 
 @property (nonatomic,strong) M3U8SegmentInfo *segment;
-@property (nonatomic,strong) NSURLSessionDownloadTask *task;
 
 @end
 
@@ -20,6 +19,7 @@
 
 - (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData
 {
+    NSURLSessionDownloadTask *tmpTask = nil;
     self.segment = segment;
     __weak M3U8SegmentInfo *weakSegment = segment;
 
@@ -27,7 +27,7 @@
     {
         NSData *resume = [resumeData dataUsingEncoding:NSUTF8StringEncoding];
         NSURLSessionDownloadTask *task = [self _downloadTaskWithOriginResumeData:resume withSegment:segment];
-        self.task = task;
+        tmpTask = task;
     }
     
     else
@@ -35,6 +35,7 @@
         NSURL *url = [NSURL URLWithString:segment.url];
         NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
         
+        assert(url != nil);
         
         NSURLSessionDownloadTask *task = [self.urlSession downloadTaskWithRequest:request
                                                                          progress:^(NSProgress * _Nonnull downloadProgress) {
@@ -55,13 +56,13 @@
                                                                     [self _dealFinishOrFailedSegment:segment error:error];
                                                                     
                                                                 }];
-        self.task = task;
+        tmpTask = task;
     }
     
-    [self.task resume];
+    [tmpTask resume];
     if ([self.delegate respondsToSelector:@selector(m3u8SegmentDownloader:downloadingBegin:task:)])
     {
-        [self.delegate m3u8SegmentDownloader:self downloadingBegin:segment task:self.task];
+        [self.delegate m3u8SegmentDownloader:self downloadingBegin:segment task:tmpTask];
     }
 }
 

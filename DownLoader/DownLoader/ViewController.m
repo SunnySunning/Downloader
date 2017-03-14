@@ -34,12 +34,12 @@
     //m3u8格式的视频 必须知道大小 下载进度才会计算出来
     downloadModel.videoSize = 178725454;
     
-    /*
+    
     DownloadModel *downloadModel01 = [[DownloadModel alloc] init];
     downloadModel01.name = @"222";
     downloadModel01.url = @"http://video.lincoo.net/1073ht/video/20160323/z160323114420432126520.mp4";
-    */
-    self.downloadModels = [NSMutableArray arrayWithArray:@[downloadModel]];
+    
+    self.downloadModels = [NSMutableArray arrayWithArray:@[downloadModel,downloadModel01]];
     
 }
 

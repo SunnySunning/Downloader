@@ -12,12 +12,14 @@
 #import "DownloadManager+Utils.h"
 #import "LocalNotificationManager.h"
 #import "DownloadCacher+M3U8.h"
+#import "DownloadManager_M3U8.h"
 
 static DownloadManager *instance;
 
 @interface DownloadManager ()<DownloadManager_M3U8_Delegate>
 
 @property (nonatomic,strong) DownloadModel *downloadingModel;
+@property (nonatomic,strong) DownloadManager_M3U8 *m3u8DownloadManager;
 
 @end
 
@@ -49,6 +51,9 @@ static DownloadManager *instance;
                 appDelegate.backgroundSessionCompletionHandler = nil;
             }
         }];
+        [self.urlSession setSessionDidBecomeInvalidBlock:^(NSURLSession * _Nonnull session, NSError * _Nonnull error) {
+            
+        }];
     }
     return self;
 }
@@ -60,6 +65,15 @@ static DownloadManager *instance;
         _downloadQueue = [NSMutableArray array];
     }
     return _downloadQueue;
+}
+
+- (DownloadManager_M3U8 *)m3u8DownloadManager
+{
+    if (!_m3u8DownloadManager)
+    {
+        _m3u8DownloadManager = [[DownloadManager_M3U8 alloc] init];
+    }
+    return _m3u8DownloadManager;
 }
 
 - (void)dealDownloadModel:(DownloadModel *)downloadModel
@@ -103,9 +117,9 @@ static DownloadManager *instance;
 
 - (void)initM3U8
 {
-    [DownloadManager_M3U8 shareInstance].delegate = self;
-    [DownloadManager_M3U8 shareInstance].downloadCacher = self.downloadCacher;
-    [DownloadManager_M3U8 shareInstance].urlSession = self.urlSession;
+    self.m3u8DownloadManager.delegate = self;
+    self.m3u8DownloadManager.downloadCacher = self.downloadCacher;
+    self.m3u8DownloadManager.urlSession = self.urlSession;
 }
 
 - (void)addDownloadModel:(DownloadModel *)downloadModel
@@ -121,9 +135,8 @@ static DownloadManager *instance;
     {
         NSLog(@"[[self.urlSession downloadTasks] count]   ===   %lu",(unsigned long)[[self.urlSession downloadTasks] count]);
         
-        while (1)
-        {
-            NSURLSessionDownloadTask *task = [[self.urlSession downloadTasks] firstObject];
+        [[self.urlSession downloadTasks] enumerateObjectsUsingBlock:^(NSURLSessionDownloadTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSURLSessionDownloadTask *task = obj;
             if (task.state == NSURLSessionTaskStateRunning)
             {
                 if (downloadModel.isM3u8Url)
@@ -132,7 +145,7 @@ static DownloadManager *instance;
                     [[self.urlSession downloadTasks] makeObjectsPerformSelector:@selector(cancel)];
                     downloadModel.status = DownloadPause;
                     [self.downloadCacher updateDownloadModel:downloadModel];
-                    [[DownloadManager_M3U8 shareInstance] pauseDownloadModel:downloadModel withResumeData:nil];
+                    [self.m3u8DownloadManager pauseDownloadModel:downloadModel withResumeData:nil];
                 }
                 else
                 {
@@ -143,9 +156,10 @@ static DownloadManager *instance;
                         [self.downloadCacher updateDownloadModel:downloadModel];
                     }];
                 }
-                break;
+
+                *stop = YES;
             }
-        }
+        }];
     }
 }
 
@@ -189,7 +203,6 @@ static DownloadManager *instance;
             }
         }
     }
-    
 }
 
 
@@ -231,7 +244,7 @@ static DownloadManager *instance;
         if (topWaitingModel.isM3u8Url)
         {
             NSDictionary *m3u8Info = [self.downloadCacher queryM3U8Record:topWaitingModel.url];
-            [[DownloadManager_M3U8 shareInstance] m3u8Downloading:topWaitingModel withInfo:m3u8Info];
+            [self.m3u8DownloadManager m3u8Downloading:topWaitingModel withInfo:m3u8Info];
         }
         else
         {
@@ -382,6 +395,7 @@ static DownloadManager *instance;
 
 - (void)m3u8Downloader:(DownloadManager_M3U8 *)m3u8Downloader failedDownload:(DownloadModel *)downloadModel
 {
+    [DownloadManager postNotification:DownloadingUpdateNotification andObject:downloadModel];
     /*
     downloadModel.status = DownloadFailed;
     [self.downloadCacher updateDownloadModel:downloadModel];

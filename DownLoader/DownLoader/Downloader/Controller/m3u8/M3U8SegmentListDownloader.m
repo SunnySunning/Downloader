@@ -43,12 +43,12 @@
 
     self.alreadyDownloadSize = [m3u8Info[@"m3u8AlreadyDownloadSize"] integerValue];
     self.downloadingIndex = [m3u8Info[@"tsDownloadTSIndex"] integerValue];
-    NSString *resumeData = m3u8Info[@"resumeData"];
+    //NSString *resumeData = m3u8Info[@"resumeData"];
     
     if (self.downloadingIndex < [segmentList.segments count] && self.downloadingIndex > 0)
     {
         M3U8SegmentInfo *segment = [self.segmentList.segments objectAtIndex:self.downloadingIndex];
-        [self _startDownload:segment withResumeData:resumeData];
+        [self _startDownload:segment withResumeData:nil];
     }
     else if (self.downloadingIndex == 0)
     {
