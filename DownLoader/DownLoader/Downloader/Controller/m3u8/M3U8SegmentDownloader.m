@@ -9,6 +9,8 @@
 #import "M3U8SegmentDownloader.h"
 #import "M3U8SegmentDownloader+Helper.h"
 
+static M3U8SegmentDownloader *instance;
+
 @interface M3U8SegmentDownloader ()
 
 @property (nonatomic,strong) M3U8SegmentInfo *segment;
@@ -17,12 +19,24 @@
 
 @implementation M3U8SegmentDownloader
 
++ (id)shareInstance
+{
+    static dispatch_once_t token3;
+    dispatch_once(&token3, ^{
+        instance = [[M3U8SegmentDownloader alloc] init];
+    });
+    return instance;
+}
+
 - (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData
 {
     NSURLSessionDownloadTask *tmpTask = nil;
     self.segment = segment;
     __weak M3U8SegmentInfo *weakSegment = segment;
+    
+    NSLog(@"downloadUrl   ===    %@",weakSegment.url);
 
+    /*
     if (![resumeData isEqualToString:@""] && resumeData)
     {
         NSData *resume = [resumeData dataUsingEncoding:NSUTF8StringEncoding];
@@ -31,11 +45,12 @@
     }
     
     else
+     */
     {
         NSURL *url = [NSURL URLWithString:segment.url];
         NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
         
-        assert(url != nil);
+        assert(self.urlSession != nil);
         
         NSURLSessionDownloadTask *task = [self.urlSession downloadTaskWithRequest:request
                                                                          progress:^(NSProgress * _Nonnull downloadProgress) {

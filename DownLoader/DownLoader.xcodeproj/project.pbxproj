@@ -237,10 +237,10 @@
 				B063EF0D1E70F7CE00A178C9 /* M3U8SegmentListDownloader.m */,
 				B063EF0F1E70F7FC00A178C9 /* M3U8SegmentDownloader.h */,
 				B063EF101E70F7FC00A178C9 /* M3U8SegmentDownloader.m */,
-				B063EF121E7102B600A178C9 /* DownloadCacher+M3U8.h */,
-				B063EF131E7102B600A178C9 /* DownloadCacher+M3U8.m */,
 				B0483E201E7668E000609BE7 /* M3U8SegmentDownloader+Helper.h */,
 				B0483E211E7668E000609BE7 /* M3U8SegmentDownloader+Helper.m */,
+				B063EF121E7102B600A178C9 /* DownloadCacher+M3U8.h */,
+				B063EF131E7102B600A178C9 /* DownloadCacher+M3U8.m */,
 			);
 			path = m3u8;
 			sourceTree = "<group>";

@@ -26,8 +26,8 @@ static DownloadManager_M3U8 *instance;
 
 + (instancetype)shareInstance
 {
-    static dispatch_once_t token;
-    dispatch_once(&token, ^{
+    static dispatch_once_t token1;
+    dispatch_once(&token1, ^{
         instance = [[DownloadManager_M3U8 alloc] init];
     });
     return instance;
@@ -46,7 +46,7 @@ static DownloadManager_M3U8 *instance;
 {
     if (!_segmentListDownloader)
     {
-        _segmentListDownloader = [[M3U8SegmentListDownloader alloc] init];
+        _segmentListDownloader = [M3U8SegmentListDownloader shareInstance];
         _segmentListDownloader.delegate = self;
         _segmentListDownloader.urlSession = self.urlSession;
         _segmentListDownloader.downloadCacher = self.downloadCacher;

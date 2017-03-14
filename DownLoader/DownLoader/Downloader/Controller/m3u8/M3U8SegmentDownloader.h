@@ -29,6 +29,7 @@
 @property (nonatomic,strong) DownloadCacher *downloadCacher;
 @property (nonatomic,weak) id<M3U8SegmentDownloaderDelegate> delegate;
 
++ (id)shareInstance;
 - (void)startDownload:(M3U8SegmentInfo *)segment withResumeData:(NSString *)resumeData;
 - (void)pauseDownloadWithResumeData:(NSData *)resumeData downloadIndex:(NSInteger)index downloadSize:(NSInteger)downloadSize url:(NSString *)url;
 - (void)_dealFinishOrFailedSegment:(M3U8SegmentInfo *)segment error:(NSError *)error;

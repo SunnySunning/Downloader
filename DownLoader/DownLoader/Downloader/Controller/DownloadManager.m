@@ -71,7 +71,7 @@ static DownloadManager *instance;
 {
     if (!_m3u8DownloadManager)
     {
-        _m3u8DownloadManager = [[DownloadManager_M3U8 alloc] init];
+        _m3u8DownloadManager = [DownloadManager_M3U8 shareInstance];
     }
     return _m3u8DownloadManager;
 }
@@ -276,9 +276,9 @@ static DownloadManager *instance;
             
         } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
             
-            [self _tryToOpenNewDownloadTask];
             [self dealDownloadFinishedOrFailedWithError:error andDownloadModel:downloadModel];
-            
+            [self _tryToOpenNewDownloadTask];
+
         }];
         [task resume];
     }

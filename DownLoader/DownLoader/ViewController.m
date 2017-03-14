@@ -28,18 +28,24 @@
     UIBarButtonItem *beginItem = [[UIBarButtonItem alloc] initWithTitle:@"初始化" style:UIBarButtonItemStylePlain target:self action:@selector(_begin:)];
     self.navigationItem.leftBarButtonItem = beginItem;
     
+    
     DownloadModel *downloadModel = [[DownloadModel alloc] init];
     downloadModel.name = @"111";
     downloadModel.url = @"http://video.lincoo.net/1073ht/video/20160425/160425162023244113619/160425162023244113619.m3u8";
     //m3u8格式的视频 必须知道大小 下载进度才会计算出来
     downloadModel.videoSize = 178725454;
     
-    
+    /*
     DownloadModel *downloadModel01 = [[DownloadModel alloc] init];
     downloadModel01.name = @"222";
     downloadModel01.url = @"http://video.lincoo.net/1073ht/video/20160323/z160323114420432126520.mp4";
     
-    self.downloadModels = [NSMutableArray arrayWithArray:@[downloadModel,downloadModel01]];
+    DownloadModel *downloadModel001 = [[DownloadModel alloc] init];
+    downloadModel001.name = @"333";
+    downloadModel001.url = @"http://video.lincoo.net/1056htcfsy/video/20160309/160309235012828162609.mp4";
+*/
+    
+    self.downloadModels = [NSMutableArray arrayWithArray:@[downloadModel]];
     
 }
 

@@ -10,6 +10,8 @@
 #import "M3U8SegmentDownloader.h"
 #import "DownloadManager+Utils.h"
 
+static M3U8SegmentListDownloader *instance;
+
 @interface M3U8SegmentListDownloader ()<M3U8SegmentDownloaderDelegate>
 
 @property (nonatomic,strong) M3U8SegmentList *segmentList;
@@ -23,11 +25,20 @@
 
 @implementation M3U8SegmentListDownloader
 
++ (id)shareInstance
+{
+    static dispatch_once_t token2;
+    dispatch_once(&token2, ^{
+        instance = [[M3U8SegmentListDownloader alloc] init];
+    });
+    return instance;
+}
+
 - (M3U8SegmentDownloader *)segmentDownloader
 {
     if (!_segmentDownloader)
     {
-        _segmentDownloader = [[M3U8SegmentDownloader alloc] init];
+        _segmentDownloader = [M3U8SegmentDownloader shareInstance];
         _segmentDownloader.urlSession = self.urlSession;
         _segmentDownloader.delegate = self;
         _segmentDownloader.downloadCacher = self.downloadCacher;
