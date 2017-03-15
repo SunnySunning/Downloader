@@ -20,6 +20,7 @@ static DownloadManager *instance;
 
 @property (nonatomic,strong) DownloadModel *downloadingModel;
 @property (nonatomic,strong) DownloadManager_M3U8 *m3u8DownloadManager;
+@property (nonatomic,assign) UIBackgroundTaskIdentifier bgTask;
 
 @end
 
@@ -39,10 +40,13 @@ static DownloadManager *instance;
     if (self = [super init])
     {
         NSURLSessionConfiguration *scf = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"nsurlsession_download_identifier"];
+        scf.sessionSendsLaunchEvents = YES;
+        scf.discretionary = YES;
         self.urlSession = [[AFURLSessionManager alloc] initWithSessionConfiguration:scf];
         self.downloadCacher = [DownloadCacher shareInstance];
         [self _checkOrCreateDownloadFolder];
         [self initM3U8];
+        
         [self.urlSession setDidFinishEventsForBackgroundURLSessionBlock:^(NSURLSession * _Nonnull session) {
             AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
             if (appDelegate.backgroundSessionCompletionHandler)
@@ -58,14 +62,37 @@ static DownloadManager *instance;
     return self;
 }
 
-- (NSMutableArray *)downloadQueue
+/*
+ self.bgTask = UIBackgroundTaskInvalid;
+ 
+ [[NSNotificationCenter defaultCenter] addObserver:self
+ selector:@selector(_onEnterForegound)
+ name:UIApplicationDidBecomeActiveNotification
+ object:nil];
+ [[NSNotificationCenter defaultCenter] addObserver:self
+ selector:@selector(_onEnterBackground)
+ name:UIApplicationDidEnterBackgroundNotification
+ object:nil];
+
+- (void)_onEnterForegound
 {
-    if (!_downloadQueue)
+    if (self.bgTask != UIBackgroundTaskInvalid)
     {
-        _downloadQueue = [NSMutableArray array];
+        [[UIApplication sharedApplication] endBackgroundTask:self.bgTask];
     }
-    return _downloadQueue;
+    self.bgTask = UIBackgroundTaskInvalid;
 }
+
+- (void)_onEnterBackground
+{
+    UIApplication* application = [UIApplication sharedApplication];
+    
+    self.bgTask = [application beginBackgroundTaskWithExpirationHandler:^{
+        [application endBackgroundTask:self.bgTask];
+        self.bgTask = UIBackgroundTaskInvalid;
+    }];
+}
+ */
 
 - (DownloadManager_M3U8 *)m3u8DownloadManager
 {
@@ -134,6 +161,8 @@ static DownloadManager *instance;
     if ([self.downloadCacher checkIsExistDownloading])
     {
         NSLog(@"[[self.urlSession downloadTasks] count]   ===   %lu",(unsigned long)[[self.urlSession downloadTasks] count]);
+        
+        
         
         [[self.urlSession downloadTasks] enumerateObjectsUsingBlock:^(NSURLSessionDownloadTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSURLSessionDownloadTask *task = obj;

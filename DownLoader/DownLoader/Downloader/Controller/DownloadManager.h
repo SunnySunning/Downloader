@@ -23,7 +23,6 @@
 
 @property (nonatomic,strong) AFURLSessionManager *urlSession;
 @property (nonatomic,strong) DownloadCacher *downloadCacher;
-@property (nonatomic,strong) NSMutableArray *downloadQueue;
 
 + (id)shareInstance;
 - (void)dealDownloadModel:(DownloadModel *)downloadModel;
